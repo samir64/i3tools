@@ -1,0 +1,147 @@
+#!/bin/bash
+
+#set -x
+
+active_window () {
+    local id=$1
+    
+    #echo $id >> ~/i3-windows.log
+    xdotool windowactivate $id
+}
+
+action () {
+    local timeout=.01
+    local button=
+    local modifiers=
+    local block=
+
+    if read -t $timeout input; then
+        #block=$(echo $input | grep -io "\"name\":\"block\-[0-9]\+\"" | grep -o "[0-9]\+")
+        #button=$(echo $input | grep -io "\"button\":[0-9]\+" | grep -o "[0-9]\+")
+        #modifiers=$(echo $input | grep -io "\"modifiers\":\[[a-z0-9\"\,]\+\]" | grep -io "\[[a-z0-9\"\,]\+\]" | grep -io "[a-z0-9]\+" | sed 's/\s*mod2//i')
+        input=$(echo $input | sed 's/^,//')
+
+        block=$(echo $input | jq '.name' | grep -o "[0-9]\+")
+        button=$(echo $input | jq '.button')
+        #modifiers=$(echo $input | jq '.modifiers' | xargs echo | sed -E 's/[^a-z0-9 ]//ig' | sed 's/\s*mod2//i')
+        modifiers=$(echo $input | jq '.modifiers' | xargs echo | sed -E 's/[^a-z0-9 ]//ig' | sed 's/\s*mod2//i' | sed -E 's/^\s+//' | sed -E 's/\s+$//')
+
+        #echo -e "Input: $input\nBlock: '$block'\nButton: '$button'\nModifiers: '$modifiers'\n-------------------------------" >> ~/i3-windows.log
+    fi
+
+    if [[ -n $block ]]; then
+        #echo $block" "$button" "$modifiers >> ~/i3-windows.log
+        if [[ -z $modifiers ]]; then
+            case $button in
+                1)
+                    $(active_window $block)
+                    ;;
+                2)
+                    ;;
+                3)
+                    ;;
+                4)
+                    ;;
+                5)
+                    ;;
+                6)
+                    ;;
+                7)
+                    ;;
+                *)
+                    ;;
+            esac
+        else
+            for modifier in $modifiers; do
+                case $modifier"+"$button in
+                    Control+1)
+                        ;;
+                    Shift+1)
+                        ;;
+                    Mod1+1)
+                        ;;
+                    Mod4+1)
+                        ;;
+                    *)
+                        ;;
+                esac
+            done
+        fi
+    fi
+    #local devices=$(xinput --list | grep -i "mouse\|touchpad" | grep -io "id=[0-9]\+" | grep -o "[0-9]\+")
+    #xinput --query-state <mouse_id>
+}
+
+get_desktop () {
+    echo $(dxotool get_desktop)
+}
+
+get_windows () {
+    echo $(xdotool search --all --onlyvisible --desktop $(xprop -notype -root _NET_CURRENT_DESKTOP | cut -c 24-) "" 2>/dev/null)
+}
+
+get_active_window () {
+    echo $(xdotool getactivewindow)
+}
+
+get_blocks () {
+    local windows=$1
+    local active_window=$2
+    local result=', [{"full_text":""}'
+
+    for window in $windows; do
+        local is_active=$([[ $active_window -eq $window ]] && echo true)
+        local win_name=
+        win_name=$(xprop -id $window | grep -i "^wm_name")
+        win_name=${win_name#*\"}
+        win_name=${win_name%\"*}
+        win_name=$(echo $win_name | sed "s/\"/٬/g")
+
+        result=$result$(get_block $window "$win_name" $is_active)
+        #echo $win_name
+    done
+    result=$result"]"
+
+    echo $result
+}
+
+get_block () {
+    local id=$1
+    local name=$2
+    local is_active=$3
+    local result=', {"":""'
+
+    result=$result", \"full_text\":\" $name$BLOCK_BUTTON \""
+    result=$result", \"name\":\"block-$id\""
+    if [[ -n $is_active ]]; then
+        result=$result", \"color\":\"#FFFFFF\""
+        result=$result", \"background\":\"#285577\""
+    else
+        result=$result", \"color\":\"#888888\""
+        result=$result", \"background\":\"#222222\""
+    fi
+    result=$result", \"border\":\"#333333\""
+    result=$result", \"separator\":false"
+    result=$result", \"separator_block_width\":3"
+    result=$result"}"
+
+    echo $result
+}
+
+#desktop=$(xprop -root | grep -i "^_net_current_desktop" | awk '{print $3}')
+#desktop=$(xdotool get_desktop)
+#blocks=", [[],[{"full_text":""}]"
+
+echo -e '{"version":1,"click_events":true}\n[[]'
+#i=0
+while [[ true ]]; do
+    windows=$(get_windows)
+    active_window=$(get_active_window)
+    blocks=$(get_blocks "$windows" $active_window)
+
+    #i=$(( $i + 1 ))
+    echo $blocks >> /tmp/i3-windows.log
+    echo $blocks
+    $(action)
+    #sleep 1
+done

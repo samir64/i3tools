@@ -1,0 +1,40 @@
+#!/bin/bash
+#set -x
+
+dir=/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/device:19/PNP0C09:01/PNP0C0A:03/power_supply/BAT0
+full=$(cat $dir/energy_full)
+now=$(cat $dir/energy_now)
+status=$(cat $dir/status)
+percent=$((100 * now / full))
+alarm_threshold=10
+action_threshold=5
+action_command=s2ram
+
+case $status in
+    Charging)
+        ;;
+    Discharging)
+        if [[ -n $1 ]]; then
+            alarm_threshold=$1
+        fi
+
+        if [[ -n $2 ]]; then
+            action_threshold=$2
+        fi
+
+        if [[ -n $3 ]]; then
+            action_command=$3
+        fi
+
+        if [[ $alarm_threshold -ge $percent ]]; then
+            notify-send -u critical -t 10000 -- "WARNING: Battery charge is LOW"
+            ffplay -f lavfi -i "sine=frequency=440:duration=500ms" -ac 2 -autoexit -nodisp
+            espeak -v en-us "warning. Battery charge is low"
+            ffplay -f lavfi -i "sine=frequency=440:duration=500ms" -ac 2 -autoexit -nodisp
+        fi
+
+        if [[ $action_threshold -ge $percent ]]; then
+            $(sudo $action_command)
+        fi
+        ;;
+esac

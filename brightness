@@ -1,0 +1,92 @@
+#!/bin/bash
+
+set -x
+
+bright=$(cat /sys/class/backlight/intel_backlight/brightness)
+max=$(cat /sys/class/backlight/intel_backlight/max_brightness)
+level=
+direction=
+step=
+param=1
+
+#echo "$bright/$max"
+
+#if [[ $# -eq 0 ]]; then
+    #result=$(qalc "$bright / $max" | cut -f2 -d '=' | cut -f2 -d ' ')
+    #echo $((100 * $bright / $max))
+	#echo $bright
+#else
+if [[ $# -gt 0 ]]; then
+    case ${!param} in
+        up)
+            level=1
+	        param=$(($param + 1))
+            ;;
+        down)
+            level=-1
+	        param=$(($param + 1))
+            ;;
+        set)
+            level=0
+            param=$(($param + 1))
+            #bright=${!param}
+            ;;
+        *)
+            level=1
+            ;;
+    esac
+
+    if [[ ${!param} > 0 ]]; then
+        step=${!param}
+    else
+        step=.1
+    fi
+fi
+
+case $BLOCK_BUTTON in
+    1) # Left Click
+        #level=0
+        #step=1
+        sudo brightness.sh set 1
+        ;;
+    2) # Middle Click
+        #level=0
+        #step=.4
+        sudo brightness.sh set .4
+        ;;
+    3) # Right Click
+        #level=0
+        #step=.2
+        sudo brightness.sh set .2
+        ;;
+    4) # Wheel Up
+        #level=1
+        #step=.05
+        sudo brightness.sh up .05
+        ;;
+    5) # Wheel Down
+        #level=-1
+        #step=.05
+        sudo brightness.sh down .05
+        ;;
+    *)
+        ;;
+esac
+
+
+if [[ -n $level ]]; then
+    step=$(qalc "$step * $max" | cut -f2 -d'=' | cut -f2 -d' ')
+
+    if [[ $level -eq 0 ]]; then
+        bright=$step
+    else
+        #result=$(qalc "max(0, min(1, $bright + $level * $step))" | cut -f2 -d '=' | cut -f2 -d ' ')
+        bright=$(qalc "round(max(0, min($max, ($level * $step) + $bright)))" | cut -f2 -d '=' | cut -f2 -d ' ')
+    fi
+
+    echo "|$level $step $bright $BLOCK_BUTTON|" >> /tmp/bright.log
+    echo $bright | tee /sys/class/backlight/intel_backlight/brightness > /dev/zero
+fi
+
+result=$(qalc "100 * $bright / $max" | cut -f2 -d'=' | cut -f2 -d' ')
+echo $result"%"
