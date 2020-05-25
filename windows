@@ -72,9 +72,9 @@ action () {
     #xinput --query-state <mouse_id>
 }
 
-get_desktop () {
-    echo $(dxotool get_desktop)
-}
+#get_desktop () {
+#    echo $(dxotool get_desktop)
+#}
 
 get_windows () {
     echo $(xdotool search --all --onlyvisible --desktop $(xprop -notype -root _NET_CURRENT_DESKTOP | cut -c 24-) "" 2>/dev/null)
