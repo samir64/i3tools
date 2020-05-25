@@ -2,13 +2,13 @@
 Useful tools for i3
 
 ## i3weather
-In `i3blocks` config file add a block for weather:
-
 ### Requirements:
 `curl` and `jq`
 ```
 apt-get install curl jq
 ```
+### Use:
+In `i3blocks` config file add a block for weather:
 
 ```
 [weather]
@@ -18,6 +18,8 @@ color=#A4C2F4
 ```
 
 ## i3windows
+### Requirements:
+### Use:
 In `i3` config file append a new bar:
 ```
 bar {
