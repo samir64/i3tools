@@ -19,6 +19,8 @@ color=#A4C2F4
 
 ## i3windows
 ### Requirements:
+`xdotool` and `jq`
+apt-get install jq xdotool
 ### Use:
 In `i3` config file append a new bar:
 ```
