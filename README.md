@@ -4,7 +4,7 @@ Useful tools for i3
 ## i3weather
 In `i3blocks` config file add a block for weather:
 
-###Requirements:
+### Requirements:
 `curl` and `jq`
 ```
 apt-get install curl jq
