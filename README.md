@@ -2,7 +2,14 @@
 Useful tools for i3
 
 ## i3weather
-In `i3blocks` add a block for weather:
+In `i3blocks` config file add a block for weather:
+
+###Requirements:
+`curl` and `jq`
+```
+apt-get install curl jq
+```
+
 ```
 [weather]
 command=i3tools/weather paris london
@@ -11,7 +18,7 @@ color=#A4C2F4
 ```
 
 ## i3windows
-In `i3 config` file append a new bar:
+In `i3` config file append a new bar:
 ```
 bar {
     font pango:Ubuntu Mono, FontAwesome 10
