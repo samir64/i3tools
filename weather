@@ -79,7 +79,7 @@ case $BLOCK_BUTTON in
         case $state in
             get)
                 #state=settings:cities
-                i3-sensible-terminal -e "curl -Ss wttr.in/$city_name && read -sn 1 -t 10"
+                i3-sensible-terminal -e "curl -Ss 'wttr.in/$city_name'; read -sn 1 -t 10"
                 ;;
             settings)
                 case $settings_selected_item in
@@ -92,7 +92,7 @@ case $BLOCK_BUTTON in
                     2)
                         ;;
                     3)
-                        i3-sensible-terminal -e "curl -Ss wttr.in/$city_name && read -sn 1 -t 10"
+                        i3-sensible-terminal -e "curl -Ss 'wttr.in/$city_name'; read -sn 1 -t 10"
                         state=get
                         ;;
                     *)
@@ -199,51 +199,56 @@ case $state in
             #result="$result_name: $result_temp"
 
             result_temp=$(curl -Ss "https://wttr.in/$city_name?0&T&Q" | cut -c 16- | head -2 | xargs echo)
-            result_location=$(curl -Ss "https://wttr.in/$city_name" | tail -3 | head -1)
-            if [[ -n $(echo $result_location | grep -io "location:") ]]; then
-                result_location=${result_location#*: }
-                result_location=${result_location% [*}
-                result_location="${result_location%%,*}, ${result_location##*,}"
+            if [[ -z $result_temp ]]; then
+                result="Server unavailable"
+                last_result=$result
             else
-                result_location=
+                result_location=$(curl -Ss "https://wttr.in/$city_name" | tail -3 | head -1)
+                if [[ -n $(echo $result_location | grep -io "location:") ]]; then
+                    result_location=${result_location#*: }
+                    result_location=${result_location% [*}
+                    result_location="${result_location%%,*}, ${result_location##*,}"
+                else
+                    result_location=
+                fi
+
+                result_status=
+
+                cond=$(echo $result_temp | grep -ioE 'cloud')$(echo $result_temp | grep -ioE 'rain')$(echo $result_temp | grep -ioE 'snow')$(echo $result_temp | grep -ioE 'sun|clear')
+                cond=$(echo $cond | tr '[:upper:]' '[:lower:]')
+
+                case $cond in
+                    cloud)
+                        result_status=
+                        ;;
+                    rain)
+                        result_status=
+                        ;;
+                    snow)
+                        result_status=
+                        ;;
+                    sun)
+                        result_status=
+                        ;;
+                    clear)
+                        result_status=
+                        ;;
+                    *)
+                        ;;
+                esac
+
+                #result_location=$(echo $result_resp | grep -iE 'location: [a-z ]+')
+                #result_location=${result_location#* }
+                #result_location=${result_location% *}
+
+                #result_temp=$(echo $result_resp)
+                #result_temp=${result_resp#*/}
+                #result_temp=${result_resp%%°C*}
+                #result_temp=
+
+                result="$result_status $result_location: $result_temp"
+                last_result=$result
             fi
-
-            result_status=
-
-            cond=$(echo $result_temp | grep -ioE 'cloud')$(echo $result_temp | grep -ioE 'rain')$(echo $result_temp | grep -ioE 'snow')$(echo $result_temp | grep -ioE 'sun|clear')
-            cond=$(echo $cond | tr '[:upper:]' '[:lower:]')
-
-            case $cond in
-                cloud)
-                    result_status=
-                    ;;
-                rain)
-                    result_status=
-                    ;;
-                snow)
-                    result_status=
-                    ;;
-                sun)
-                    result_status=
-                    ;;
-                clear)
-                    result_status=
-                    ;;
-                *)
-                    ;;
-            esac
-
-            #result_location=$(echo $result_resp | grep -iE 'location: [a-z ]+')
-            #result_location=${result_location#* }
-            #result_location=${result_location% *}
-
-            #result_temp=$(echo $result_resp)
-            #result_temp=${result_resp#*/}
-            #result_temp=${result_resp%%°C*}
-            #result_temp=
-
-            result="$result_status $result_location: $result_temp"
-            last_result=$result
 
             #result_weather=$(ansiweather -a false -w false -h false -p false -d false -s false -l $city_name)
             #result=$(echo $result_weather | cut -c 12- | sed 's/ => /: /')
