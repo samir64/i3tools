@@ -112,7 +112,7 @@ case $BLOCK_BUTTON in
         ;;
     2) # Middle Click
         state=get
-        last_refresh=0
+        last_refresh=-1
         ;;
     3) # Right Click
         #state=settings
@@ -200,7 +200,7 @@ case $state in
 
             result_temp=$(curl -Ss "https://wttr.in/$city_name?0&T&Q" | cut -c 16- | head -2 | xargs echo)
             if [[ -z $result_temp ]]; then
-                result="Server unavailable"
+                result="Service unavailable"
                 last_result=$result
             else
                 result_location=$(curl -Ss "https://wttr.in/$city_name" | tail -3 | head -1)
