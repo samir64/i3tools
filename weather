@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#set -x
+set -x
 
 conf_file="/tmp/i3-weather.conf"
 
@@ -55,31 +55,32 @@ else
     cities="auto"
 fi
 
-if [[ $last_refresh -ge 0 && $((now - last_refresh)) -ge $interval ]]; then
-    i=0
-    for c in $cities; do
-        if [[ $i -eq $city ]]; then
-            if [[ $c == auto ]]; then
-                #ip=$(curl -Ss https://ipinfo.io/ip)
-                #data=$(curl -Ss http://api.ipstack.com/$ip?access_key=8cbc8cbafe9a1c3fb306f77fd72b5d7a&format=1)
-                #city_name=$(echo $data | jq '.city' | grep -oE '\w+')
+#if [[ $last_refresh -ge 0 && $((now - last_refresh)) -ge $interval ]]; then
+#fi
+i=0
+for c in $cities; do
+    if [[ $i -eq $city ]]; then
+        if [[ $c == auto ]]; then
+            #ip=$(curl -Ss https://ipinfo.io/ip)
+            #data=$(curl -Ss http://api.ipstack.com/$ip?access_key=8cbc8cbafe9a1c3fb306f77fd72b5d7a&format=1)
+            #city_name=$(echo $data | jq '.city' | grep -oE '\w+')
 
-                #city_name=$(curl -Ss http://ipinfo.io/json | jq '.city' | grep -oE '\w+')
-                city_name=$(curl -Ss http://ipinfo.io/city | sed 's/ /_/g')
-            else
-                city_name=$c
-            fi
+            #city_name=$(curl -Ss http://ipinfo.io/json | jq '.city' | grep -oE '\w+')
+            city_name=$(curl -Ss http://ipinfo.io/city | sed 's/ /_/g')
+        else
+            city_name=$c
         fi
-        i=$((i + 1))
-    done
-fi
+    fi
+    i=$((i + 1))
+done
 
 case $BLOCK_BUTTON in
     1) # Left Click
         case $state in
             get)
                 #state=settings:cities
-                i3-sensible-terminal -e "curl -Ss 'wttr.in/$city_name'; read -sn 1 -t 10"
+                i3-sensible-terminal -e "curl -Ss 'wttr.in/$city_name' &&"
+                #i3-sensible-terminal -e "curl -Ss 'wttr.in/$city_name'; read -sn 1 -t 10"
                 ;;
             settings)
                 case $settings_selected_item in
@@ -320,6 +321,6 @@ echo "last_result=$last_result" | sed 's/ /_/g' >> $conf_file
 #    result="HI"$BLOCK_BUTTON$input
 #fi
 
-echo $result
+echo -e $result
 #echo "$cities : $city/$(($# + 1)) , $state" >> ~/i3-weather.log
 
