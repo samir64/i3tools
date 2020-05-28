@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#set -x
+
+second_layout=$(setxkbmap -query | grep layout | cut -f2 -d ',')
+current=$(xset -q | grep LED | awk '{print $10}' | cut -b 5)
+ir=
+en=
+
+if [[ $second_layout == ir ]]; then
+    ir=1
+    en=0
+else
+    ir=0
+    en=1
+fi
+
+case $BLOCK_BUTTON in
+    1) # Left Click
+        if [[ $ir -eq 1 ]]; then
+            setxkbmap -layout ir,us
+        else
+            setxkbmap -layout us,ir
+        fi
+
+        BLOCK_BUTTON=
+        keyboard-layout.sh
+        ;;
+    *) # Else
+        case $current in
+           $en)
+               echo "English"
+               ;;
+           $ir)
+               echo "فارسی"
+               ;;
+        esac
+        ;;
+esac
+

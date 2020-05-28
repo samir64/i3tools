@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#set -x
+
+up=$(uptime -p)
+
+up_d=$(echo $up | grep -Eo "[0-9]+\s*day" | cut -f1 -d' ')
+up_h=$(echo $up | grep -Eo "[0-9]+\s*hour" | cut -f1 -d' ')
+up_m=$(echo $up | grep -Eo "[0-9]+\s*min" | cut -f1 -d' ')
+
+result=
+
+
+if [[ -z $up_h ]]; then
+    up_h=0
+fi
+
+if [[ -z $up_m ]]; then
+    up_m=0
+fi
+
+if [[ -n $up_d ]]; then
+    result=$up_d"d"
+fi
+
+if [[ -n $result ]]; then
+    result=$(echo "$result, ")
+fi
+result=$(echo "$result$up_h")
+
+if [[ -n $result ]]; then
+    result=$(echo "$result:")
+fi
+result=$(echo "$result$up_m'")
+
+echo $result;

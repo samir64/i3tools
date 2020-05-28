@@ -47,27 +47,27 @@ case $BLOCK_BUTTON in
     1) # Left Click
         #level=0
         #step=1
-        sudo brightness.sh set 1
+        sudo ~/.config/i3/i3tools/brightness set 1
         ;;
     2) # Middle Click
         #level=0
         #step=.4
-        sudo brightness.sh set .4
+        sudo ~/.config/i3/i3tools/brightness set .4
         ;;
     3) # Right Click
         #level=0
         #step=.2
-        sudo brightness.sh set .2
+        sudo ~/.config/i3/i3tools/brightness set .2
         ;;
     4) # Wheel Up
         #level=1
         #step=.05
-        sudo brightness.sh up .05
+        sudo ~/.config/i3/i3tools/brightness up .05
         ;;
     5) # Wheel Down
         #level=-1
         #step=.05
-        sudo brightness.sh down .05
+        sudo ~/.config/i3/i3tools/brightness down .05
         ;;
     *)
         ;;
