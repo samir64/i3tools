@@ -1,0 +1,107 @@
+#!/bin/bash
+
+set -x
+
+modes="suspend\nhibernate\nreboot\nshutdown"
+action=
+dir=$(pwd)
+user=$USER
+show_menu=
+get_var=
+
+for param in $@; do
+    case $get_var in
+        call)
+            case $param in
+                menu)
+                    show_menu=1
+                    ;;
+                *)
+                    action=$param
+                    ;;
+            esac
+            ;;
+        user)
+            user=$param
+            ;;
+        dir)
+            dir=$param
+            ;;
+        *)
+            ;;
+    esac
+
+    get_var=
+
+    case $param in
+        -c)
+            get_var=call
+            ;;
+        --call)
+            get_var=call
+            ;;
+        -u)
+            get_var=user
+            ;;
+        --user)
+            get_var=user
+            ;;
+        -d)
+            get_var=dir
+            ;;
+        --dir)
+            get_var=dir
+            ;;
+        *)
+    esac
+done
+
+case $action in
+    hibernate)
+        sudo s2disk > /dev/zero
+        sudo -u $user i3lock
+        ;;
+    suspend)
+        sudo s2ram > /dev/zero
+        sudo -u $user i3lock
+        ;;
+    reboot)
+        sudo reboot -t 0
+        ;;
+    shutdown)
+        sudo shutdown -t 0
+        ;;
+    *)
+        ;;
+esac
+
+case $BLOCK_BUTTON in
+    1)
+        show_menu=1
+        ;;
+    2)
+        ;;
+    3)
+        ;;
+    4)
+        ;;
+    5)
+        ;;
+    6)
+        ;;
+    7)
+        ;;
+    *)
+        ;;
+esac
+
+if [[ -n $show_menu ]]; then
+    selected=$(echo -e $modes | dmenu -i)
+
+    if [[ -n $selected ]]; then
+        #sudo ~/.config/i3/i3tools/power-mgm --dir ~/.config/i3/i3tools --user $user --call $selected
+        sudo ~/.config/i3/i3tools/power-mgm --user $user --call $selected
+    fi
+fi
+
+#echo "{\"dir\":\"$dir\",\"user\":\"$user\",\"action\":\"$action\",\"selected\":\"$selected\"}" > ~/power.log
