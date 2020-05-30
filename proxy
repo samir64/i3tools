@@ -1,0 +1,156 @@
+#!/bin/bash
+
+set -x
+
+state=
+cmd=
+user=
+dir=$(pwd)
+disconnected=
+connected=
+get_var=
+config_file=
+proxy_on=
+proxy_off=
+proxy_state=
+
+for i in $@; do
+    if [[ -z $get_var ]]; then
+        case $i in
+            -c)
+                get_var=config
+                ;;
+            --config)
+                get_var=config
+                ;;
+            -d)
+                get_var=dir
+                ;;
+            --dir)
+                get_var=dir
+                ;;
+            -s)
+                get_var=cmd
+                ;;
+            --set)
+                get_var=cmd
+                ;;
+            -u)
+                get_var=user
+                ;;
+            --user)
+                get_var=user
+                ;;
+            *)
+                ;;
+        esac
+    else
+        case $get_var in
+            config)
+                config_file=$i
+                ;;
+            dir)
+                dir=$i
+                ;;
+            cmd)
+                cmd=$i
+                ;;
+            user)
+                user=$i
+                ;;
+            *)
+                ;;
+        esac
+        get_var=
+    fi
+done
+
+if [[ -n $config_file ]]; then
+    while IFS= read -r line; do
+        line=${line%%#*}
+        line=$(echo $line | sed 's/^\s*//' | sed 's/\s*$//')
+        if [[ -n $line ]]; then
+            key=${line%%=*}
+            value=${line#*=}
+            key=$(echo $key | sed 's/^\s*//' | sed 's/\s*$//')
+            value=$(echo $value | sed 's/^\s*//' | sed 's/\s*$//')
+            #key=$(echo $line | cut -f1 -d'=' | sed 's/^\s*//' | sed 's/\s*$//')
+            #value=$(echo $line | cut -f2 -d'=' | sed 's/^\s*//' | sed 's/\s*$//')
+
+            case $key in
+                user)
+                    user=$value
+                    ;;
+                proxy_on)
+                    proxy_on=$value
+                    ;;
+                proxy_off)
+                    proxy_off=$value
+                    ;;
+                proxy_state)
+                    proxy_state=$value
+                    ;;
+                *)
+                    ;;
+            esac
+        fi
+    done < $config_file
+fi
+
+state=$(eval "$proxy_state")
+
+#if [[ -z $cmd ]]; then
+    #BLOCK_BUTTON=1
+#fi
+
+case $BLOCK_BUTTON in
+    1)
+        #sudo $dir/proxy -c $config_file -d $dir --set on
+        eval "$proxy_on" > /dev/zero
+        state=1
+        ;;
+    2)
+        if [[ -z $state ]]; then
+            eval "$proxy_on" > /dev/zero
+            state=1
+        else
+            eval "$proxy_off" > /dev/zero
+            state=
+        fi
+        ;;
+    3)
+        #sudo $dir/proxy -c $config_file -d $dir --set off
+        eval "$proxy_off" > /dev/zero
+        state=
+        ;;
+    4)
+        ;;
+    5)
+        ;;
+    6)
+        ;;
+    7)
+        ;;
+    *)
+        case $cmd in
+            on)
+                eval "$proxy_on" > /dev/zero
+                state=1
+                ;;
+            off)
+                eval "$proxy_off" > /dev/zero
+                state=
+                ;;
+            *)
+                ;;
+        esac
+        ;;
+esac
+
+if [[ -n $state ]]; then
+    result=$connected
+else
+    result=$disconnected
+fi
+
+echo $result
