@@ -75,7 +75,8 @@ esac
 
 
 if [[ -n $level ]]; then
-    step=$(qalc "$step * $max" | cut -f2 -d'=' | cut -f2 -d' ')
+    #step=$(qalc "$step * $max" | cut -f2 -d'=' | cut -f2 -d' ')
+    step=$(echo "scale=0; ($step * $max) / 1" | bc)
 
     if [[ $level -eq 0 ]]; then
         bright=$step
@@ -88,5 +89,6 @@ if [[ -n $level ]]; then
     echo $bright | tee /sys/class/backlight/intel_backlight/brightness > /dev/zero
 fi
 
-result=$(qalc "100 * $bright / $max" | cut -f2 -d'=' | cut -f2 -d' ')
+#result=$(qalc "100 * $bright / $max" | cut -f2 -d'=' | cut -f2 -d' ')
+result=$(echo "scale=0; (100 * $bright / $max) / 1" | bc)
 echo $result"%"

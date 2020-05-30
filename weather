@@ -8,7 +8,7 @@ result=
 state=get
 city=0
 now=$(date +"%s")
-last_refresh=0
+last_refresh=-1
 last_result=
 interval=300
 settings="Interval Cities Metrics Forecast"
@@ -79,8 +79,8 @@ case $BLOCK_BUTTON in
         case $state in
             get)
                 #state=settings:cities
-                i3-sensible-terminal -e "curl -Ss 'wttr.in/$city_name' &&"
-                #i3-sensible-terminal -e "curl -Ss 'wttr.in/$city_name'; read -sn 1 -t 10"
+                #i3-sensible-terminal -e "curl -Ss 'wttr.in/$city_name' && read"
+                terminator -e "curl -Ss 'wttr.in/$city_name'; read -sn 1 -t 10"
                 ;;
             settings)
                 case $settings_selected_item in
@@ -93,7 +93,7 @@ case $BLOCK_BUTTON in
                     2)
                         ;;
                     3)
-                        i3-sensible-terminal -e "curl -Ss 'wttr.in/$city_name'; read -sn 1 -t 10"
+                        terminator -e "curl -Ss 'wttr.in/$city_name'; read -sn 1 -t 10"
                         state=get
                         ;;
                     *)

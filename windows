@@ -4,7 +4,7 @@
 
 active_window () {
     local id=$1
-    
+
     #echo $id >> ~/i3-windows.log
     xdotool windowactivate $id
 }
