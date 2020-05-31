@@ -27,7 +27,7 @@ days_map = {
     "Thu": "پنج‌شنبه",
     "Fri": "جمعه"
 }
-        
+
 for c in date:
     if c in numbers_map:
         result += numbers_map[c]
@@ -39,4 +39,4 @@ for c in date:
 
 day = days_map[day]
 
-print(" {} {}".format(result, day))
+print("{} {}".format(result, day))

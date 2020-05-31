@@ -8,10 +8,12 @@ dir=$(pwd)
 user=$USER
 show_menu=
 get_var=
+color=
+image=
 
 for param in $@; do
     case $get_var in
-        call)
+        action)
             case $param in
                 menu)
                     show_menu=1
@@ -27,6 +29,12 @@ for param in $@; do
         dir)
             dir=$param
             ;;
+        color)
+            color="--color $param"
+            ;;
+        image)
+            image="--image $param"
+            ;;
         *)
             ;;
     esac
@@ -34,11 +42,11 @@ for param in $@; do
     get_var=
 
     case $param in
-        -c)
-            get_var=call
+        -a)
+            get_var=action
             ;;
-        --call)
-            get_var=call
+        --action)
+            get_var=action
             ;;
         -u)
             get_var=user
@@ -52,6 +60,18 @@ for param in $@; do
         --dir)
             get_var=dir
             ;;
+        -c)
+            get_var=color
+            ;;
+        --color)
+            get_var=color
+            ;;
+        -i)
+            get_var=image
+            ;;
+        --image)
+            get_var=image
+            ;;
         *)
     esac
 done
@@ -59,11 +79,11 @@ done
 case $action in
     hibernate)
         sudo s2disk > /dev/zero
-        sudo -u $user i3lock
+        sudo -u $user i3lock -t $color $image
         ;;
     suspend)
         sudo s2ram > /dev/zero
-        sudo -u $user i3lock
+        sudo -u $user i3lock -t $color $image
         ;;
     reboot)
         sudo reboot -t 0
@@ -99,8 +119,8 @@ if [[ -n $show_menu ]]; then
     selected=$(echo -e $modes | dmenu -i)
 
     if [[ -n $selected ]]; then
-        #sudo ~/.config/i3/i3tools/power-mgm --dir ~/.config/i3/i3tools --user $user --call $selected
-        sudo ~/.config/i3/i3tools/power-mgm --user $user --call $selected
+        #sudo ~/.config/i3/i3tools/power-mgm --dir ~/.config/i3/i3tools --user $user --action $selected
+        sudo ~/.config/i3/i3tools/power-mgm --user $user --action $selected $color $image
     fi
 fi
 
