@@ -6,14 +6,17 @@ conf_file="/tmp/i3-weather.conf"
 
 result=
 state=get
-city=0
+city=1
+unit=0
 now=$(date +"%s")
-last_refresh=-1
+last_refresh=0
 last_result=
 interval=300
-settings="Interval Cities Metrics Forecast"
+settings="Interval Cities Units Forecast"
+units="°C °F"
 settings_selected_item=0
 settings_items_count=4
+unit_mark=
 
 if [[ -f $conf_file ]]; then
     for line in $(cat $conf_file); do
@@ -32,6 +35,9 @@ if [[ -f $conf_file ]]; then
                 ;;
             city)
                 city=$val
+                ;;
+            unit)
+                unit=$val
                 ;;
             interval)
                 interval=$val
@@ -74,13 +80,19 @@ for c in $cities; do
     i=$((i + 1))
 done
 
+if [[ $unit -eq 0 ]]; then
+    unit_mark=m
+else
+    unit_mark=u
+fi
+
 case $BLOCK_BUTTON in
     1) # Left Click
         case $state in
             get)
                 #state=settings:cities
                 #i3-sensible-terminal -e "curl -Ss 'wttr.in/$city_name' && read"
-                terminator -e "curl -Ss 'wttr.in/$city_name'; read -sn 1 -t 10"
+                terminator -e "curl -Ss 'wttr.in/$city_name?$unit_mark'; read -sn 1 -t 10"
                 ;;
             settings)
                 case $settings_selected_item in
@@ -91,9 +103,10 @@ case $BLOCK_BUTTON in
                         state=settings:cities
                         ;;
                     2)
+                        state=settings:units
                         ;;
                     3)
-                        terminator -e "curl -Ss 'wttr.in/$city_name'; read -sn 1 -t 10"
+                        terminator -e "curl -Ss 'wttr.in/$city_name?$unit_mark'; read -sn 1 -t 10"
                         state=get
                         ;;
                     *)
@@ -102,6 +115,10 @@ case $BLOCK_BUTTON in
                 ;;
             settings:interval)
                 state=get
+                ;;
+            settings:units)
+                state=get
+                last_refresh=-1
                 ;;
             settings:cities)
                 state=get
@@ -147,6 +164,9 @@ case $BLOCK_BUTTON in
             settings:interval)
                 interval=$((interval + 15))
                 ;;
+            settings:units)
+                unit=$(((unit + 1) % 2))
+                ;;
             settings:cities)
                 city=$(((city + 1) % ($# + 1)))
                 ;;
@@ -167,6 +187,13 @@ case $BLOCK_BUTTON in
 
                 if [[ $interval -lt 15 ]]; then
                     interval=15
+                fi
+                ;;
+            settings:units)
+                unit=$(((unit - 1) % 2))
+
+                if [[ $unit -lt 0 ]]; then
+                    unit=$((2 + $unit))
                 fi
                 ;;
             settings:cities)
@@ -194,24 +221,28 @@ case $state in
         if [[ $last_refresh -ge 0 && $((now - last_refresh)) -ge $interval ]]; then
             last_refresh=$now
 
+            response=$(curl -Ss en.wttr.in/$city_name?1nT$unit_mark)
+            result_temp=$(printf "%s" "$response" | head -4 | tail -2 | cut -c 16- | xargs echo)
+            result_location=$(printf "%s" "$response" | tail -3 | head -1 | sed -E 's/\w+:\s+([^,]+).*,([^\[]+)\[.*$/\1,\2/')
+
             #result_name=$(curl -Ss "https://wttr.in" | head -1 | grep -oE '\w+: .*$' | grep -oE '[\w, ]+')
             #result_temp=$(curl -Ss "https://wttr.in/ $city_name" | head -7 | tail -5 | head -2 | cut -c 16- | xargs echo)
             #result=$(curl -Ss "https://wttr.in? $city_name" | head -1 | grep -E '\w+, .*$' -o)": "$(curl -Ss "https://wttr.in?0&T&Q $city_name" | cut -c 16- | head -2 | xargs echo)
             #result="$result_name: $result_temp"
 
-            result_temp=$(curl -Ss "https://wttr.in/$city_name?0&T&Q" | cut -c 16- | head -2 | xargs echo)
+            #result_temp=$(curl -Ss "https://wttr.in/$city_name?0&T&Q" | cut -c 16- | head -2 | xargs echo)
             if [[ -z $result_temp || -n $(echo $result_temp | grep -i "bad gateway") ]]; then
                 result="Service unavailable"
                 last_result=$result
             else
-                result_location=$(curl -Ss "https://wttr.in/$city_name" | tail -3 | head -1)
-                if [[ -n $(echo $result_location | grep -io "location:") ]]; then
-                    result_location=${result_location#*: }
-                    result_location=${result_location% [*}
-                    result_location="${result_location%%,*}, ${result_location##*,}"
-                else
-                    result_location=
-                fi
+                #result_location=$(curl -Ss "https://wttr.in/$city_name" | tail -3 | head -1)
+                #if [[ -n $(echo $result_location | grep -io "location:") ]]; then
+                #    result_location=${result_location#*: }
+                #    result_location=${result_location% [*}
+                #    result_location="${result_location%%,*}, ${result_location##*,}"
+                #else
+                #    result_location=
+                #fi
 
                 result_status=
 
@@ -255,7 +286,7 @@ case $state in
                 #result_temp=${result_resp%%°C*}
                 #result_temp=
 
-                result="$result_status $result_temp ($result_location)"
+                result="$result_status $result_temp - $result_location"
                 last_result=$result
             fi
 
@@ -291,6 +322,18 @@ case $state in
         fi
         result="$result$interval_s\""
         ;;
+    settings:units)
+        result="Units: "
+        i=0
+        for u in $units; do
+            if [[ $i == $unit ]]; then
+                result="$result $u"
+            else
+                result="$result $u"
+            fi
+            i=$((i + 1))
+        done
+        ;;
     settings:cities)
         result="Cities: "
         i=0
@@ -320,6 +363,7 @@ fi
 
 echo "state=$state" > $conf_file
 echo "city=$city" >> $conf_file
+echo "unit=$unit" >> $conf_file
 echo "interval=$interval" >> $conf_file
 echo "settings_selected_item=$settings_selected_item" >> $conf_file
 echo "last_refresh=$last_refresh" >> $conf_file
