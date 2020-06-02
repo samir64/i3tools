@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -x
+
+labels=(🟢 🟡 🟠 🔴)
+cpu_clocks=($(lscpu | grep -i "mhz" | awk '{print $NF}' | cut -d'.' -f1 | xargs echo))
+cur_clock=${cpu_clocks[0]}
+max_clock=${cpu_clocks[1]}
+min_clock=${cpu_clocks[2]}
+level1=$((($max_clock - $min_clock) / 4 * 1 + $min_clock))
+level2=$((($max_clock - $min_clock) / 4 * 2 + $min_clock))
+level3=$((($max_clock - $min_clock) / 4 * 3 + $min_clock))
+levels=($min_clock $level1 $level2 $level3 $max_clock)
+label=
+
+for i in ${!levels[@]}; do
+    if [[ $i -lt 4 ]]; then
+        if [[ $cur_clock -gt ${levels[$i]} && $cur_clock -lt ${levels[(($i + 1))]} ]]; then
+            label=${labels[$i]}
+        fi
+    fi
+done
+
+result=$(($cur_clock / 100))
+result=$(echo $result | cut -c1)"."$(echo $result | cut -c2)
+echo "$label $result GHz"
