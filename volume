@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -x
+
+volume=$(/usr/share/i3blocks/volume $@)
+label=
+
+if [[ $volume == MUTE ]]; then
+    label="🔇"
+    volume=
+elif [[ ${volume%\%*} -lt 30 ]]; then
+    label="🔈"
+elif [[ ${volume%\%*} -lt 70 ]]; then
+    label="🔉"
+else
+    label="🔊"
+fi
+
+echo $label$volume
