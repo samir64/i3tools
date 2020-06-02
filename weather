@@ -9,7 +9,7 @@ state=get
 city=1
 unit=0
 now=$(date +"%s")
-last_refresh=0
+last_refresh=-1
 last_result=
 interval=300
 settings="Interval Cities Units Forecast"
@@ -92,7 +92,7 @@ case $BLOCK_BUTTON in
             get)
                 #state=settings:cities
                 #i3-sensible-terminal -e "curl -Ss 'wttr.in/$city_name' && read"
-                terminator -e "curl -Ss 'wttr.in/$city_name?$unit_mark'; read -sn 1 -t 10"
+                terminator --title "Weather $city_name" -e "curl -Ss 'wttr.in/$city_name?$unit_mark'; read -sn 1 -t 10"
                 ;;
             settings)
                 case $settings_selected_item in
@@ -106,7 +106,7 @@ case $BLOCK_BUTTON in
                         state=settings:units
                         ;;
                     3)
-                        terminator -e "curl -Ss 'wttr.in/$city_name?$unit_mark'; read -sn 1 -t 10"
+                        terminator --title "Weather $city_name" -e "curl -Ss 'wttr.in/$city_name?$unit_mark'; read -sn 1 -t 10"
                         state=get
                         ;;
                     *)
@@ -143,6 +143,9 @@ case $BLOCK_BUTTON in
                 state=get
                 ;;
             settings:interval)
+                state=settings
+                ;;
+            settings:units)
                 state=settings
                 ;;
             settings:cities)
@@ -231,7 +234,7 @@ case $state in
             #result="$result_name: $result_temp"
 
             #result_temp=$(curl -Ss "https://wttr.in/$city_name?0&T&Q" | cut -c 16- | head -2 | xargs echo)
-            if [[ -z $result_temp || -n $(echo $result_temp | grep -i "bad gateway") ]]; then
+            if [[ -z $result_temp || -n $(echo $response | grep -i "bad gateway") ]]; then
                 result="Service unavailable"
                 last_result=$result
             else
@@ -246,10 +249,16 @@ case $state in
 
                 result_status=
 
-                cond=$(echo $result_temp | grep -ioE 'partly')$(echo $result_temp | grep -ioE 'cloud')$(echo $result_temp | grep -ioE 'rain')$(echo $result_temp | grep -ioE 'snow')$(echo $result_temp | grep -ioE 'sun|clear')
+                cond=$(echo $result_temp | grep -ioE 'partly')$(echo $result_temp | grep -ioE 'cloud')$(echo $result_temp | grep -ioE 'rain')$(echo $result_temp | grep -ioE 'snow')$(echo $result_temp | grep -ioE 'sun|clear')$(echo $result_temp | grep -ioE 'sand')
                 cond=$(echo $cond | tr '[:upper:]' '[:lower:]')
 
                 case $cond in
+                    storm)
+                        result_status=🌪
+                        ;;
+                    sand)
+                        result_status=🌫
+                        ;;
                     partlycloud)
                         result_status=🌤
                         ;;

@@ -86,10 +86,10 @@ case $action in
         sudo -u $user i3lock -t $color $image
         ;;
     reboot)
-        sudo reboot -t 0
+        sudo shutdown -r now
         ;;
     shutdown)
-        sudo shutdown -t 0
+        sudo shutdown -r now
         ;;
     *)
         ;;
