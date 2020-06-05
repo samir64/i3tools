@@ -1,0 +1,3 @@
+proxy_on=sshpass -p 'PASSWORD' ssh -qfNCD 8000 USER@IP
+proxy_off=proc=$(ps -x | grep -iE "ssh[a-z -]*-\w*D[a-z ]+8000" | awk '{print $1}'); [[ -z $proc ]] || printf "%s" "$proc" | xargs kill
+proxy_state=[[ $(ps -x | grep -iE "ssh[a-z -]*-\w*D[a-z ]+8000" | wc -l) -eq 0 ]] || echo 1

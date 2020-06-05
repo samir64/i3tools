@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+#set -x
 
 state=
 cmd=
@@ -153,4 +153,4 @@ else
     result=$disconnected
 fi
 
-echo $result
+echo -n $result

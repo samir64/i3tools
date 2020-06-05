@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+#set -x
 
 labels=(🟢 🟡 🟠 🔴)
 cpu_clocks=($(lscpu | grep -i "mhz" | awk '{print $NF}' | cut -d'.' -f1 | xargs echo))

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#set -x
+
+packages=$(apt list --upgradable 2>/dev/zero | wc -l)
+packages=$(($packages - 1))
+result=
+
+if [[ $packages -eq 0 ]]; then
+    result="No Updates"
+elif [[ $packages -eq 1 ]]; then
+    result="1 Update"
+else
+    result="$packages Updates"
+fi
+
+echo $result

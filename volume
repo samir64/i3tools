@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+#set -x
 
 volume=$(/usr/share/i3blocks/volume $@)
 label=

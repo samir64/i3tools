@@ -1,4 +1,5 @@
 #!/bin/bash
+
 #set -x
 
 dir=/sys/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A08:00/device:19/PNP0C09:01/PNP0C0A:03/power_supply/BAT0
