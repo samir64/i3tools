@@ -4,6 +4,7 @@
 
 up=$(uptime -p)
 
+up_w=$(echo $up | grep -Eo "[0-9]+\s*week" | cut -f1 -d' ')
 up_d=$(echo $up | grep -Eo "[0-9]+\s*day" | cut -f1 -d' ')
 up_h=$(echo $up | grep -Eo "[0-9]+\s*hour" | cut -f1 -d' ')
 up_m=$(echo $up | grep -Eo "[0-9]+\s*min" | cut -f1 -d' ')
@@ -19,7 +20,14 @@ if [[ -z $up_m ]]; then
     up_m=0
 fi
 
+if [[ -n $up_w ]]; then
+    result=$up_w"w"
+fi
+
 if [[ -n $up_d ]]; then
+    if [[ -n $result ]]; then
+        result=$(echo "$result, ")
+    fi
     result=$up_d"d"
 fi
 
