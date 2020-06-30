@@ -21,6 +21,7 @@ for i in ${!levels[@]}; do
     fi
 done
 
-result=$(($cur_clock / 100))
-result=$(echo $result | cut -c1)"."$(echo $result | cut -c2)
+ghz=$(($cur_clock / 1000))
+mhz=$(($cur_clock / 100 - ghz * 10))
+result=$(echo $ghz)"."$(echo $mhz)
 echo "$label $result GHz"

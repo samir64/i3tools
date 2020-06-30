@@ -18,9 +18,9 @@ fi
 case $BLOCK_BUTTON in
     1) # Left Click
         if [[ $ir -eq 1 ]]; then
-            setxkbmap -layout ir,us
+            setxkbmap -layout ir,us -option grp:alt_shift_toggle
         else
-            setxkbmap -layout us,ir
+            setxkbmap -layout us,ir -option grp:alt_shift_toggle
         fi
 
         BLOCK_BUTTON=
