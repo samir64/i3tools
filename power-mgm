@@ -89,7 +89,7 @@ case $action in
         sudo shutdown -r now
         ;;
     shutdown)
-        sudo shutdown -r now
+        sudo shutdown now
         ;;
     *)
         ;;

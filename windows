@@ -95,7 +95,7 @@ get_blocks () {
         win_name=$(xprop -id $window | grep -i "^wm_name")
         win_name=${win_name#*\"}
         win_name=${win_name%\"*}
-        win_name=$(echo $win_name | sed "s/\"/٬/g")
+        win_name=$(echo $win_name | sed "s/\"/٬/g" | sed "s/\\\\/\//g")
 
         result=$result$(get_block $window "$win_name" $is_active)
         #echo $win_name
