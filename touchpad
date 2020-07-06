@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+#set -x
 
 id=$(xinput list | grep -ioE "touchpad\s+id=[0-9]+" | cut -d'=' -f2)
 enabled=$(xinput list-props $id | grep -iE "device enabled" | grep -oE "[0-9]$")
