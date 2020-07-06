@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#set -x
+
+evtest /dev/input/event3 | while read ch; do
+    key_pressed=$(echo $ch | grep -i "value 1")
+
+    if [[ -n $key_pressed ]]; then
+        id=$(xinput list | grep -ioE "touchpad\s+id=[0-9]+" | cut -d'=' -f2)
+        enabled=$(xinput list-props $id | grep -iE "device enabled" | grep -oE "[0-9]$")
+
+      if [[ $enabled -eq 1 ]]; then
+            xinput disable $id
+            sleep .01
+           xinput enable $id
+        fi
+    fi
+done
