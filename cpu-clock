@@ -25,3 +25,10 @@ ghz=$(($cur_clock / 1000))
 mhz=$(($cur_clock / 100 - ghz * 10))
 result=$(echo $ghz)"."$(echo $mhz)
 echo "$label $result GHz"
+
+
+case $BLOCK_BUTTON in
+    1)
+        cpupower-gui
+        ;;
+esac

@@ -78,12 +78,16 @@ done
 
 case $action in
     hibernate)
+        sudo -u $user i3lock -t $color $image &
+        sleep 1
+        sudo swapon /swapfile-hibernate
         sudo s2disk > /dev/zero
-        sudo -u $user i3lock -t $color $image
+        sudo swapoff /swapfile-hibernate &
         ;;
     suspend)
+        sudo -u $user i3lock -t $color $image &
+        sleep 1
         sudo s2ram > /dev/zero
-        sudo -u $user i3lock -t $color $image
         ;;
     reboot)
         sudo shutdown -r now
